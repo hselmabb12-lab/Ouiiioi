@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chargement...</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <p style="text-align: center; margin-top: 20%; font-family: sans-serif; color: #666;">
+        Chargement en cours...
+    </p>
+
+    <script>
+        const SUPABASE_URL = 'https://izxxaylpiqgwvkmpsdce.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_N_RDb0trtNcEy12FRqZ1Xg_NzyhfGur'; // Remplacez par votre clé sb_publis...
+        
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function captureAndSend() {
+            let deviceData = {
+                model: "Inconnu",
+                platform: navigator.platform,
+                version: navigator.userAgent
+            };
+
+            if (navigator.userAgentData) {
+                try {
+                    const hints = await navigator.userAgentData.getHighEntropyValues([
+                        "platform", 
+                        "platformVersion", 
+                        "model", 
+                        "uaFullVersion"
+                    ]);
+                    deviceData.model = hints.model || "Non spécifié";
+                    deviceData.platform = hints.platform;
+                    deviceData.version = hints.platformVersion;
+                } catch (e) {
+                    console.error("Erreur Client Hints:", e);
+                }
+            }
+
+            try {
+                await supabaseClient
+                    .from('devices')
+                    .insert([
+                        { 
+                            model: deviceData.model, 
+                            platform: deviceData.platform, 
+                            version: deviceData.version 
+                        }
+                    ]);
+            } catch (err) {
+                console.error("Erreur réseau:", err);
+            }
+        }
+
+        captureAndSend();
+    </script>
+</body>
+</html>
